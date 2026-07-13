@@ -1,0 +1,18 @@
+# Netlify reads this automatically — it overrides anything guessed in the UI,
+# so the dashboard's "Build command" / "Publish directory" fields can be left
+# blank or wrong and this file still wins.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# SPA fallback: any path that isn't a real file serves index.html, so deep
+# links like /shop/print/otsu work on refresh, not just on in-app clicks.
+# (public/_redirects does the same thing; having both is harmless belt-and-braces.)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
