@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Sugoi Haven design tokens (blueprint §1)
+   washi  — paper cream (primary background, never pure white)
+   sumi   — ink black (text & line work)
+   aizuri — Hokusai's Prussian/indigo blue (primary brand color)
+   bokashi— Hiroshige's graduated sky greys/blues (backgrounds/transitions)
+   ume    — single warm plum/coral accent: CTAs and price tags ONLY
+------------------------------------------------------------------- */
+@theme {
+  --color-washi: #f5efe3;
+  --color-washi-deep: #ece3d0;
+  --color-sumi: #221f1b;
+  --color-sumi-soft: #4a453d;
+  --color-aizuri: #1d4460;
+  --color-aizuri-deep: #122f45;
+  --color-aizuri-mist: #7f9cb0;
+  --color-bokashi: #dee5e8;
+  --color-ume: #c05a4d;
+  --color-ume-deep: #a84437;
+
+  --font-display: "Noto Serif JP", "Georgia", serif;
+  --font-sans: "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--color-washi);
+  color: var(--color-sumi);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  /* faint washi fiber texture, pure CSS */
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(29, 68, 96, 0.025) 0 1.5px, transparent 2px),
+    radial-gradient(circle at 76% 64%, rgba(34, 31, 27, 0.02) 0 1px, transparent 1.6px);
+  background-size: 340px 340px, 260px 260px;
+}
+
+h1, h2, h3, .font-display { font-family: var(--font-display); }
+
+/* bokashi — soft graduated section transition, sky-to-paper */
+.bokashi-down { background: linear-gradient(180deg, var(--color-bokashi) 0%, var(--color-washi) 78%); }
+.bokashi-up { background: linear-gradient(0deg, var(--color-bokashi) 0%, var(--color-washi) 78%); }
+
+/* ink-bleed hover vignette for print cards (CSS only — blueprint §4) */
+.ink-card { position: relative; transition: transform 0.25s ease; content-visibility: auto; contain-intrinsic-size: auto 300px; }
+.ink-card::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  box-shadow: inset 0 0 0 0 rgba(18, 47, 69, 0);
+  transition: box-shadow 0.3s ease; border-radius: inherit;
+}
+.ink-card:hover { transform: scale(1.02); }
+.ink-card:hover::after { box-shadow: inset 0 0 26px 2px rgba(18, 47, 69, 0.16); }
+
+/* hairline rules in sumi, editorial rhythm */
+.rule { border-color: color-mix(in srgb, var(--color-sumi) 18%, transparent); }
+
+/* keyboard focus, always visible */
+:focus-visible { outline: 2px solid var(--color-aizuri); outline-offset: 2px; }
+
+/* elements revealed by GSAP start hidden only when motion is allowed */
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal] { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
