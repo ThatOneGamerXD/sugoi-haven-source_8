@@ -102,7 +102,7 @@ for (const path of routes) {
 }
 console.log(`[prerender] Wrote ${written} static HTML pages (incl. 404.html).`);
 
-// ---- sitemap.xml (indexable routes only; cart/checkout/search/404 excluded) ----
+// ---- sitemap.xml (indexable routes only; search/cart/checkout/404 excluded (cart/checkout routes removed entirely — Snipcart owns that flow)) ----
 const indexable = sitemapRoutes();
 const today = new Date().toISOString().slice(0, 10);
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>

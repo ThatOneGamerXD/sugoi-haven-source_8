@@ -4,7 +4,6 @@ import Home from './pages/Home';
 import Shop from './pages/Shop';
 import PrintPage from './pages/PrintPage';
 import { SetPage, ArtistShop } from './pages/SetAndArtist';
-import { CartPage, CheckoutPage } from './pages/CartCheckout';
 import { HistoryLayout, HistoryOverview, HistoryProcess, HistoryTimeline } from './pages/history/History';
 import { ArtistSpotlight, Glossary, AuthenticationGuide } from './pages/history/HistoryRef';
 import { About, ShippingReturns, FAQ, Contact, Search } from './pages/Utility';
@@ -21,8 +20,6 @@ export default function AppRoutes() {
         <Route path="/shop/set/:seriesSlug" element={<SetPage />} />
         <Route path="/shop/print/:designSlug" element={<PrintPage />} />
         <Route path="/shop/artist/:artistSlug" element={<ArtistShop />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/history" element={<HistoryLayout />}>
           <Route index element={<HistoryOverview />} />
           <Route path="process" element={<HistoryProcess />} />

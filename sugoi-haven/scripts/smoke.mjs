@@ -2,7 +2,7 @@ import { JSDOM } from 'jsdom';
 import { readFileSync } from 'node:fs';
 
 const routes = ['/', '/shop', '/shop/set/tokaido-53-stations', '/shop/print/otsu',
-  '/shop/artist/hokusai', '/shop/print/kajikazawa-kai', '/shop/set/fuji-36-views', '/cart', '/checkout', '/history', '/history/process',
+  '/shop/artist/hokusai', '/shop/print/kajikazawa-kai', '/shop/set/fuji-36-views', '/history', '/history/process',
   '/history/timeline', '/history/hiroshige', '/history/glossary',
   '/history/authentication', '/about', '/faq', '/search', '/definitely-not-a-page'];
 

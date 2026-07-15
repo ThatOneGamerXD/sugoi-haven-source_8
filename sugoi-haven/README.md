@@ -94,6 +94,50 @@ After your first deploy with this live, submit `https://your-domain/sitemap.xml`
 to Google Search Console and Bing Webmaster Tools — that's what actually gets
 the site crawled and indexed, prerendering alone doesn't do it automatically.
 
+## Checkout — Snipcart
+
+Checkout is handled entirely by Snipcart (snipcart.com), a cart/checkout
+overlay that needs no backend of its own — it adds a slide-in cart panel and
+full checkout flow on top of this static site. There are no more custom
+`/cart` or `/checkout` pages; the header's Cart button opens Snipcart's own
+panel from any page.
+
+**Setup (your side, ~15 minutes):**
+1. Create a free Snipcart account at snipcart.com.
+2. In their dashboard, connect a payment processor (Stripe is the simplest —
+   you'll need a Stripe account too, free to create).
+3. Copy your **Public API Key** from Snipcart's dashboard. Use the **Test**
+   key first — test mode is free forever and lets you place fake orders with
+   fake card numbers (4242 4242 4242 4242) to confirm everything works before
+   any money is real.
+4. On Netlify: **Site configuration → Environment variables → Add a
+   variable** — Key: `VITE_SNIPCART_API_KEY`, Value: your key. (Note the
+   `VITE_` prefix — required for Vite to expose it, unlike `SITE_URL` or
+   `INVENTORY_CSV_URL` which don't need it.)
+5. **Trigger deploy → Clear cache and deploy site.**
+6. Test a full purchase with the test key and a fake card. When ready to
+   accept real money, swap the env var to your **Live** key and redeploy —
+   that's the only change needed.
+
+**Pricing** (verify current numbers at snipcart.com/pricing before relying on
+this): roughly 2% per transaction, or a flat ~$20/month if you're under
+$1,000 in monthly sales — whichever is cheaper. Testing/development mode is
+free indefinitely. Stripe/PayPal's own processing fees apply on top,
+separately.
+
+**How listings map to Snipcart items:** each print page renders one
+`snipcart-add-item` button per Listing (publisher/condition/price), all
+present in the page's HTML — CSS hides all but the currently-selected one.
+This is intentional, not a bug: Snipcart verifies every price by re-crawling
+the item's page, so every possible listing needs to be findable on that page
+regardless of which one was showing when the page was generated. `qty` is
+capped at 1 per listing (`data-item-max-quantity="1"`) since each is a unique
+physical print — Snipcart's own inventory tracking then marks a listing sold
+out the instant it's purchased, so the same print can't be sold twice.
+**Snipcart does not know about your Google Sheet** — if you mark something
+`sold` there, also delete/cancel its abandoned listing in Snipcart's
+dashboard if it was ever added to a cart, to avoid the two systems disagreeing.
+
 ## Live inventory via Google Sheets
 
 Inventory is no longer hard-coded — `scripts/fetch-inventory.mjs` runs before
@@ -172,8 +216,8 @@ The two routing modes are now automatic — nothing to hand-edit:
    workflow once live.
 6. (Optional) Connect a custom domain under Domain settings.
 
-- Checkout and the contact form are wired but mock: no payment or email
-  provider is attached, and nothing sensitive is collected.
+- **Checkout is real, via Snipcart** — see "Checkout — Snipcart" below.
+- The contact form is still wired but mock: no email provider attached yet.
 - Waitlist signups (out-of-stock designs) currently persist to the visitor's
   own localStorage (`sugoi-haven-waitlist-v1`) as a stand-in — point
   `submitWaitlist()` in `PrintPage.jsx` at your email provider at launch,

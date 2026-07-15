@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f5efe3" />
+    <link rel="preconnect" href="https://cdn.snipcart.com" />
+    <link rel="stylesheet" href="https://cdn.snipcart.com/themes/v3.7.1/default/snipcart.css" />
     <title>Sugoi Haven — Japanese Woodblock Prints</title>
     <meta name="description" content="Antique and reprint ukiyo-e woodblock prints by Hokusai and Hiroshige — every design, every publisher, honestly graded." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -13,6 +15,32 @@
   </head>
   <body>
     <div id="root"></div>
+    <!--
+      Snipcart handles the entire cart + checkout flow (no custom /cart or
+      /checkout pages needed). API key comes from the VITE_SNIPCART_API_KEY
+      env var — Vite substitutes %VITE_SNIPCART_API_KEY% into this static
+      HTML at build time (works identically for local dev and Netlify).
+      The inline script below only loads Snipcart's JS if a real key was
+      substituted in — until then this is a harmless no-op, not a failed
+      auth request on every pageview. See README for setup.
+    -->
+    <div
+      hidden
+      id="snipcart"
+      data-api-key="%VITE_SNIPCART_API_KEY%"
+      data-config-modal-style="side"
+      data-currency="usd"
+    ></div>
+    <script>
+      (function () {
+        var key = document.getElementById('snipcart').dataset.apiKey;
+        if (!key || key.charAt(0) === '%') return; // placeholder never got replaced — no key configured yet
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://cdn.snipcart.com/themes/v3.7.1/default/snipcart.js';
+        document.body.appendChild(s);
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

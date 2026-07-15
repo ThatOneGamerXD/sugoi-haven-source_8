@@ -21,8 +21,6 @@ const STATIC_PAGES = {
     title: `Shop All Prints — ${SITE_NAME}`,
     description: 'Browse the complete Fifty-Three Stations of the Tōkaidō and Thirty-Six Views of Mount Fuji, one page per artwork with every publisher\u2019s copy compared side by side.',
   },
-  '/cart': { title: `Your Cart — ${SITE_NAME}`, description: 'Review the prints in your cart before checkout.', noindex: true },
-  '/checkout': { title: `Checkout — ${SITE_NAME}`, description: 'Complete your order of hand-printed ukiyo-e woodblock prints.', noindex: true },
   '/history': {
     title: `History of Woodblock — ${SITE_NAME}`,
     description: 'What ukiyo-e is, how four craftsmen made every print by hand, and why the same design exists in many editions.',

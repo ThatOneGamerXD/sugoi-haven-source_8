@@ -5,6 +5,7 @@ import PrintImage from '../components/PrintImage';
 import DesignCard from '../components/DesignCard';
 import { Badge, Button, Card, inputCls } from '../components/ui';
 import { usePageReveals } from '../lib/animations';
+import { SITE_URL } from '../lib/seo';
 
 /**
  * Blueprint §3b, walked exactly:
@@ -169,7 +170,7 @@ export default function PrintPage() {
             </div>
           )}
 
-          <AddToCart listing={selected} />
+          <SnipcartAddToCart design={design} listings={ls} selectedId={selectedId} />
 
           {inSeries.length > 0 && (
             <p className="mt-8 text-xs text-sumi-soft">
@@ -194,26 +195,51 @@ export default function PrintPage() {
   );
 }
 
-function AddToCart({ listing }) {
-  const cart = useCart();
-  if (!listing) return null;
-  const inCart = cart.has(listing.id);
+/**
+ * Snipcart validates every price by re-fetching the item's `data-item-url`
+ * and checking a matching data-item-id/price element actually exists on that
+ * page. Because this page defaults to showing the CHEAPEST listing, a
+ * customer who picks a pricier publisher needs THAT listing's button to also
+ * exist in the page's real HTML — not just the one selected at prerender
+ * time. So every listing gets a real button here; CSS `hidden` shows only
+ * the one matching the current selection. All of them survive to the
+ * prerendered static HTML (hidden ≠ removed), so Snipcart's crawl always
+ * finds a match, whichever publisher the customer actually bought.
+ */
+function SnipcartAddToCart({ design, listings, selectedId }) {
+  if (!listings.length) return null;
+  const url = `${SITE_URL}/shop/print/${design.slug}`;
   return (
     <div className="mt-5">
-      <Button
-        variant="primary"
-        className="w-full sm:w-auto"
-        disabled={inCart}
-        onClick={() => cart.add(listing.id)}
-      >
-        {inCart ? 'In your cart' : `Add to cart — $${listing.price}`}
-      </Button>
+      {listings.map(l => (
+        <button
+          key={l.id}
+          type="button"
+          hidden={l.id !== selectedId}
+          className="snipcart-add-item w-full cursor-pointer rounded px-5 py-2.5 text-sm font-medium tracking-wide text-washi transition-colors duration-200 sm:w-auto bg-ume hover:bg-ume-deep"
+          data-item-id={l.id}
+          data-item-name={`${design.displayLabel} — ${l.publisher} (${l.condition})`}
+          data-item-price={l.price}
+          data-item-url={url}
+          data-item-image={l.photos?.[0] ?? undefined}
+          data-item-description={l.notes}
+          data-item-quantity="1"
+          data-item-max-quantity="1"
+          data-item-custom1-name="Publisher"
+          data-item-custom1-value={l.publisher}
+          data-item-custom2-name="Condition"
+          data-item-custom2-value={l.condition}
+          data-item-custom3-name="Print year"
+          data-item-custom3-value={l.printYear || 'unknown'}
+        >
+          Add to cart — ${l.price}
+        </button>
+      ))}
       <p className="mt-2 text-xs text-sumi-soft">You're buying this exact copy; each listing is a unique physical print.</p>
     </div>
   );
 }
 
-import { useCart } from '../lib/CartContext';
 
 /** Full-screen zoom overlay; closes on backdrop click or Escape. */
 function Lightbox({ onClose, children }) {

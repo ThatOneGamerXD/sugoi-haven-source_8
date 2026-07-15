@@ -1,7 +1,6 @@
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { SealMark } from './Marks';
-import { useCart } from '../lib/CartContext';
 import { useSEO } from '../lib/useSEO';
 
 const nav = [
@@ -12,7 +11,6 @@ const nav = [
 ];
 
 export default function Layout() {
-  const cart = useCart();
   const { pathname } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   useSEO();
@@ -38,14 +36,15 @@ export default function Layout() {
                 {n.label}
               </NavLink>
             ))}
-            <Link to="/cart" className="relative ml-2 rounded border border-sumi/25 px-3 py-1.5 text-sm text-sumi hover:border-aizuri hover:text-aizuri">
+            {/* Snipcart's own cart trigger: opens the cart panel, its
+                items-count span auto-updates once snipcart.js loads. */}
+            <button
+              type="button"
+              className="snipcart-checkout relative ml-2 cursor-pointer rounded border border-sumi/25 px-3 py-1.5 text-sm text-sumi hover:border-aizuri hover:text-aizuri"
+            >
               Cart
-              {cart.count > 0 && (
-                <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-ume text-[11px] font-semibold text-washi">
-                  {cart.count}
-                </span>
-              )}
-            </Link>
+              <span className="snipcart-items-count absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-ume text-[11px] font-semibold text-washi empty:hidden" />
+            </button>
             <button
               type="button"
               onClick={() => setMenuOpen(o => !o)}

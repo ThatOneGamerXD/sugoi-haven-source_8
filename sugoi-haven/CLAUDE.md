@@ -4,7 +4,7 @@ This file briefs Claude Code (or any fresh Claude session) on this project. It e
 
 ## What this is
 
-An e-commerce site for ukiyo-e Japanese woodblock prints (Hokusai's Thirty-Six Views of Mount Fuji, Hiroshige's Fifty-Three Stations of the Tōkaidō). Live on Netlify (site name "cheery-cactus-eac4da"), deploys automatically from the `main` branch of this GitHub repo. The owner is non-technical: explain changes plainly, avoid jargon in anything user-facing, and never assume they'll debug something themselves.
+An e-commerce site for ukiyo-e Japanese woodblock prints (Hokusai's Thirty-Six Views of Mount Fuji, Hiroshige's Fifty-Three Stations of the Tōkaidō). Live at [https://sugoihaven.com](https://sugoihaven.com) (Netlify site "cheery-cactus-eac4da"), deploys automatically from the `main` branch of this GitHub repo. The owner is non-technical: explain changes plainly, avoid jargon in anything user-facing, and never assume they'll debug something themselves.
 
 ## The inviolable data-model rule
 
@@ -27,7 +27,7 @@ NEVER create a new Design/page/tile for a publisher or condition variant — tho
 
 ## SEO system
 
-`src/lib/seo.js` is the single source of truth for titles/descriptions/ JSON-LD, consumed at build time by `scripts/prerender.mjs` and at runtime by `src/lib/useSEO.js` (Layout). If you add a route, add it there too, or prerender will skip it. Cart/checkout/search/404 are noindex and excluded from the sitemap on purpose. `SITE_URL` env var switches the whole system to a custom domain when the owner buys one.
+`src/lib/seo.js` is the single source of truth for titles/descriptions/ JSON-LD, consumed at build time by `scripts/prerender.mjs` and at runtime by `src/lib/useSEO.js` (Layout). If you add a route, add it there too, or prerender will skip it. Search/404 are noindex and excluded from the sitemap on purpose (cart/checkout aren't routes at all — see Checkout section below). `SITE_URL` env var switches the whole system to a custom domain (already set to [https://sugoihaven.com](https://sugoihaven.com) in production).
 
 ## Images
 
@@ -41,13 +41,22 @@ Tokens in `src/index.css` (Tailwind v4 `@theme`): washi cream bg (never pure whi
 
 ## Testing
 
-`node scripts/smoke.mjs` after `npm run build` — jsdom-mounts \~19 routes against the deploy bundle (real paths, not hash URLs) and probes key content. Run it before pushing anything nontrivial. Note its limitation: it checks text presence, not visual rendering or opacity.
+`node scripts/smoke.mjs` after `npm run build` — jsdom-mounts \~17 routes against the deploy bundle (real paths, not hash URLs) and probes key content. Run it before pushing anything nontrivial. Note its limitation: it checks text presence, not visual rendering or opacity.
+
+## Checkout — real, via Snipcart (not mock)
+
+Cart \+ checkout is Snipcart (overlay script, no backend of ours). There are NO `/cart` or `/checkout` routes anymore — deliberately removed. The old `CartContext.jsx` and `CartCheckout.jsx` are deleted; don't recreate them. The header's Cart button uses Snipcart's own `snipcart-checkout` / `snipcart-items-count` classes.
+
+**Critical pattern, don't "simplify" this away:** `PrintPage.jsx` renders one `snipcart-add-item` button PER LISTING (not just the selected one), with only the selected one visible via the `hidden` attribute. This is required because Snipcart verifies every price by re-crawling the item's `data-item-url` page looking for a matching `data-item-id`/`data-item-price` element — since the page defaults to showing the cheapest listing, a customer buying a pricier publisher's copy needs THAT listing's button to also exist in the page's real (prerendered) HTML, not just the one visible at generation time. If you ever touch this component, keep all listings' buttons in the DOM.
+
+API key: `VITE_SNIPCART_API_KEY` env var (note the `VITE_` prefix — required, unlike `SITE_URL`/`INVENTORY_CSV_URL`). Substituted into `index.html` via Vite's built-in `%VAR%` HTML replacement. A small inline guard script skips loading snipcart.js entirely if the placeholder never got replaced, so an unconfigured deploy doesn't throw failed-auth errors on every pageview.
+
+Snipcart's own stock tracking (via `data-item-max-quantity="1"`) is separate from the Google Sheet — the owner needs to manually clear abandoned Snipcart carts for anything they mark `sold` in the Sheet, the two systems don't talk to each other.
 
 ## What is mock / not yet built
 
-- Checkout collects no payment (demo). Planned: Snipcart (fits qty-1 unique prints; auto-decrements stock). Not built yet.  
 - Contact form and waitlist signups persist only to the visitor's own localStorage (`sugoi-haven-waitlist-v1`) — must be pointed at a real provider before they're trusted.  
-- Remaining roadmap: custom domain \+ `SITE_URL` env var, Search Console sitemap submission, Snipcart checkout, owner's photography pass, phase-2 "compare copies" toggle on print pages.
+- Remaining roadmap: Search Console/Bing submission (done as of this writing), owner's photography pass (ongoing), phase-2 "compare copies" toggle on print pages.
 
 ## Workflow expectations
 
