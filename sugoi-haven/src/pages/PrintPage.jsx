@@ -226,10 +226,13 @@ function SnipcartAddToCart({ design, listings, selectedId }) {
           data-item-quantity="1"
           data-item-max-quantity="1"
           data-item-custom1-name="Publisher"
+          data-item-custom1-type="readonly"
           data-item-custom1-value={l.publisher}
           data-item-custom2-name="Condition"
+          data-item-custom2-type="readonly"
           data-item-custom2-value={l.condition}
           data-item-custom3-name="Print year"
+          data-item-custom3-type="readonly"
           data-item-custom3-value={l.printYear || 'unknown'}
         >
           Add to cart — ${l.price}

@@ -133,6 +133,15 @@ must say the real production domain or checkout fails with "URL of some
 products could not be reached." This bit the owner once already; if it
 recurs after a domain change, check both places.
 
+**Fixed bug, don't reintroduce:** Snipcart's product custom fields
+(Publisher/Condition/Print year) MUST carry `data-item-custom{N}-type="readonly"`
+in `PrintPage.jsx`'s `SnipcartAddToCart`. Without it, Snipcart's default
+behavior treats custom fields as CUSTOMER-EDITABLE inputs (its intended use
+case is things like "engraving text" or "gift note") — meaning a customer
+could literally type over "Yuyudo" / "Fine" with anything they want, and
+that tampered text is what would show on the actual order. `readonly` is
+what makes them plain display-only info instead.
+
 **Fixed bug, don't reintroduce:** Snipcart's overlay (cart/checkout/the
 post-order "Thank you" screen) lives outside React's tree — it doesn't know
 when our router navigates. Without intervention, clicking a nav link while
