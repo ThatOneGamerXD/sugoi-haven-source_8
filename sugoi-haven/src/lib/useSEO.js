@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { seoForRoute, SITE_NAME, SITE_URL } from './seo';
 
@@ -37,6 +37,7 @@ function setRobots(noindex) {
  *  once the SPA is running, so in-app navigation stays correct too. */
 export function useSEO() {
   const { pathname } = useLocation();
+  const mounted = useRef(false);
   useEffect(() => {
     // Unknown route = the NotFound page; give it the /404 metadata (incl. noindex).
     const seo = seoForRoute(pathname) ?? seoForRoute('/404');
@@ -52,5 +53,16 @@ export function useSEO() {
     setMeta('name', 'twitter:title', seo.title);
     setMeta('name', 'twitter:description', seo.description);
     setJsonLd(seo.jsonLd);
+
+    // Snipcart's cart/checkout overlay lives outside our React tree — it
+    // doesn't know when OUR router navigates. Without this, clicking a nav
+    // link while the cart (or the post-checkout "Thank you" screen) is open
+    // changes the URL and swaps the page underneath, but Snipcart's overlay
+    // stays visually on top, making the site look frozen. Closing it on
+    // every real navigation (not the initial page load) fixes that.
+    if (mounted.current) {
+      try { window.Snipcart?.api?.theme?.cart?.close?.(); } catch { /* Snipcart not loaded — nothing to close */ }
+    }
+    mounted.current = true;
   }, [pathname]);
 }

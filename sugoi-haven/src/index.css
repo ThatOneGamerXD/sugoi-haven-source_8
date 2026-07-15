@@ -67,3 +67,78 @@ h1, h2, h3, .font-display { font-family: var(--font-display); }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
+
+/* ------------------------------------------------------------------
+   Snipcart theme override (checkout should feel native to the site,
+   not like a bolted-on generic widget).
+
+   Snipcart exposes a documented set of CSS custom properties
+   (docs.snipcart.com/v3/setup/theming) that its own stylesheet reads
+   from. Setting them here — in OUR stylesheet, loaded after Snipcart's
+   in <head> — overrides their defaults without touching Snipcart's own
+   CSS file or risking breakage on their updates. Only colors are
+   covered by their official variables; the supplementary rules below
+   target their documented, version-pinned class names to swap in our
+   fonts and soften button shapes. Kept conservative on purpose —
+   deeper structural overrides risk breaking their responsive layout.
+------------------------------------------------------------------- */
+:root {
+  /* Primary action (Add to cart, Place order) -> our ume accent */
+  --color-buttonPrimary: var(--color-washi);
+  --bgColor-buttonPrimary: var(--color-ume);
+  --borderColor-buttonPrimary: var(--color-ume);
+  --color-buttonPrimary-hover: var(--color-washi);
+  --bgColor-buttonPrimary-hover: var(--color-ume-deep);
+  --borderColor-buttonPrimary-hover: var(--color-ume-deep);
+  --color-buttonPrimary-active: var(--color-washi);
+  --bgColor-buttonPrimary-active: var(--color-ume-deep);
+  --borderColor-buttonPrimary-active: var(--color-ume-deep);
+  --shadow-buttonPrimary-focus: 0 0 0 3px color-mix(in srgb, var(--color-ume) 35%, transparent);
+
+  /* Secondary actions / links -> our aizuri indigo */
+  --color-link: var(--color-aizuri);
+  --bgColor-link: transparent;
+  --borderColor-link: var(--color-aizuri);
+  --color-link-hover: var(--color-aizuri-deep);
+  --bgColor-link-hover: transparent;
+  --borderColor-link-hover: var(--color-aizuri-deep);
+  --color-link-active: var(--color-aizuri-deep);
+  --shadow-link-focus: 0 0 0 3px color-mix(in srgb, var(--color-aizuri) 30%, transparent);
+
+  /* Base surfaces & text -> washi/sumi, matching the rest of the site */
+  --color-default: var(--color-sumi);
+  --borderColor-default: color-mix(in srgb, var(--color-sumi) 18%, transparent);
+  --bgColor-default: var(--color-washi);
+  --color-alt: var(--color-sumi-soft);
+  --bgColor-alt: var(--color-washi-deep);
+  --color-icon: var(--color-aizuri);
+  --bgColor-modal: var(--color-washi);
+  --bgColor-modalVeil: color-mix(in srgb, var(--color-sumi) 55%, transparent);
+
+  /* Status colors kept close to convention (clarity matters more than
+     brand-matching for "error"/"success") but softened toward our palette */
+  --color-success: #2f6b4f;
+  --bgColor-success: #e7f0ea;
+  --color-error: var(--color-ume-deep);
+  --borderColor-error: var(--color-ume);
+  --bgColor-error: color-mix(in srgb, var(--color-ume) 12%, var(--color-washi));
+  --bgColor-info: var(--color-bokashi);
+}
+
+#snipcart, .snipcart-modal, .snipcart-layout {
+  font-family: var(--font-sans);
+}
+#snipcart .snipcart__font--secondary,
+#snipcart .snipcart-cart__secondary-header-title,
+#snipcart h1, #snipcart h2, #snipcart h3 {
+  font-family: var(--font-display) !important;
+}
+/* Buttons: match the site's flatter, hairline-edged shape instead of
+   Snipcart's default heavier rounding */
+#snipcart button.snipcart-button-primary,
+#snipcart button.snipcart-button-secondary,
+#snipcart .snipcart__actions .snipcart-button {
+  border-radius: 4px !important;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}

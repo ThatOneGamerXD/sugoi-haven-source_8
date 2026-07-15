@@ -138,6 +138,31 @@ out the instant it's purchased, so the same print can't be sold twice.
 `sold` there, also delete/cancel its abandoned listing in Snipcart's
 dashboard if it was ever added to a cart, to avoid the two systems disagreeing.
 
+### Reskinning it further
+
+Snipcart's own colors are set via CSS custom properties at the bottom of
+`src/index.css` (search "Snipcart theme override"), matched to the site's
+washi/aizuri/ume tokens. This is Snipcart's officially documented theming
+surface (docs.snipcart.com/v3/setup/theming) — safe to extend since it
+overrides their defaults rather than editing their stylesheet directly. A
+few things are NOT controllable this way (notably the empty vertical space
+in a side-cart with only 1 item) — that's Snipcart's own layout stretching
+to fill the panel height, not a bug, and fixing it would mean fragile
+structural CSS overrides fighting their responsive layout. Not recommended.
+
+### Before accepting real money
+
+- **Shipping**: Store Configuration → Shipping — nothing is configured out
+  of the box; unshipped orders currently wouldn't be charged for postage.
+- **Tax**: Store Configuration → Taxes (Stripe Tax / TaxJar / manual rates).
+  Not tax advice — check with an accountant on your actual obligations.
+- **Order notifications**: Store Configuration → Notifications, so you get
+  emailed when an order comes in, not just the customer.
+- **Domains**: Store Configuration → Domains & URLs must list your real
+  domain(s) or order validation fails with "URL of some products could not
+  be reached" (this bit us once — see git history / ask Claude if it recurs).
+- Swap `VITE_SNIPCART_API_KEY` from your Test to your Live key, redeploy.
+
 ## Live inventory via Google Sheets
 
 Inventory is no longer hard-coded — `scripts/fetch-inventory.mjs` runs before
