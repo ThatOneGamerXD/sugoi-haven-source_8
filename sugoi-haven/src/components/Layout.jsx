@@ -2,6 +2,7 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { SealMark } from './Marks';
 import { useCart } from '../lib/CartContext';
+import { useSEO } from '../lib/useSEO';
 
 const nav = [
   { to: '/shop', label: 'Shop' },
@@ -14,6 +15,7 @@ export default function Layout() {
   const cart = useCart();
   const { pathname } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  useSEO();
   useEffect(() => { window.scrollTo(0, 0); setMenuOpen(false); }, [pathname]);
 
   return (

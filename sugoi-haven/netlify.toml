@@ -9,10 +9,7 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# SPA fallback: any path that isn't a real file serves index.html, so deep
-# links like /shop/print/otsu work on refresh, not just on in-app clicks.
-# (public/_redirects does the same thing; having both is harmless belt-and-braces.)
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# No SPA catch-all redirect on purpose: every real route is prerendered to a
+# static file by scripts/prerender.mjs, so unknown URLs should get Netlify's
+# native 404 handling (dist/404.html, real 404 status) — not the homepage
+# with a 200, which Google treats as a soft-404.

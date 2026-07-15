@@ -51,6 +51,49 @@ Series (src/data/catalog.js)  — historical edition / shop set
   candidate, bakes the single working file into the data, and reports any
   design that needs manual sourcing. After that there is no waterfall at all.
 
+## SEO — pre-rendered pages, sitemap, and social previews
+
+Every build now runs `npm run build` → fetch inventory → build the client
+bundle → build a small server-side bundle → render all 121 real routes to
+static HTML (see `scripts/prerender.mjs`). This is automatic; you don't run
+anything extra. It gives you:
+
+- **Real content for crawlers and link previews**, not an empty
+  `<div id="root">`. Pasting a print-page URL into iMessage/Slack/Twitter now
+  shows a proper title, description, and image card.
+- **Per-page titles and descriptions** (`src/lib/seo.js` is the single source
+  of truth — used both at build time and for in-app navigation via
+  `src/lib/useSEO.js`, so they can never drift apart).
+- **Product structured data** (JSON-LD) on every print page — name, artist,
+  and live price/availability per publisher, pulled straight from your
+  Google Sheet at build time.
+- **`sitemap.xml`** and **`robots.txt`**, generated automatically and listing
+  every route.
+
+### Deep-optimization pass (round 2)
+
+- **True 404s**: every unknown URL now serves a designed 404 page with a real
+  404 status (no more soft-404 homepage-with-200). The SPA catch-all redirect
+  was removed on purpose — all real routes exist as prerendered files.
+- **`noindex` on cart/checkout/search** (and the 404 page); all four excluded
+  from the sitemap.
+- **Product JSON-LD now includes the required `image`** (listing photo >
+  verified reference scan > brand card) — without it Google rejects product
+  rich results entirely.
+- **BreadcrumbList JSON-LD** on print pages; **WebSite + Organization**
+  JSON-LD (incl. sitelinks SearchAction) on the homepage.
+- **og:type=product** on print pages; verified artwork scans used as
+  og:image; sitemap gains `lastmod`.
+
+**Once you have a custom domain**, set the `SITE_URL` environment variable on
+Netlify (e.g. `https://sugoihaven.com`) — canonical links, Open Graph tags,
+and the sitemap all pick it up automatically on the next deploy. Until then
+everything defaults to your `.netlify.app` address.
+
+After your first deploy with this live, submit `https://your-domain/sitemap.xml`
+to Google Search Console and Bing Webmaster Tools — that's what actually gets
+the site crawled and indexed, prerendering alone doesn't do it automatically.
+
 ## Live inventory via Google Sheets
 
 Inventory is no longer hard-coded — `scripts/fetch-inventory.mjs` runs before
@@ -98,12 +141,37 @@ is used, so local dev works before the Sheet exists.
 - These scans are development placeholders only. Production listings must use
   your own photography of the physical prints (blueprint §3c).
 
-## Deployment notes
+## Deploying for real
 
-- The app ships with `HashRouter` so the static build runs from a plain file.
-  For real hosting, switch to `BrowserRouter` in `src/App.jsx` (one-line change),
-  remove `base: './'` from `vite.config.js`, and add an SPA rewrite rule — you'll
-  get the blueprint's clean URLs (`/shop/print/otsu`).
+The two routing modes are now automatic — nothing to hand-edit:
+- `npm run build` → deploy build: `BrowserRouter`, clean URLs
+  (`/shop/print/otsu`), root-relative asset paths. This is what you push to
+  Netlify/Vercel/etc.
+- `SINGLEFILE=1 npm run build` → the double-click-able preview: `HashRouter`,
+  relative paths, everything inlined into one `index.html`.
+- `public/_redirects` (already included) tells Netlify to serve `index.html`
+  for any path, so deep links like `/shop/print/otsu` work on refresh, not
+  just when clicked from within the app. Vercel/Cloudflare Pages auto-detect
+  SPAs and don't need this file, but it's harmless to leave in.
+
+**Steps, in order:**
+1. Push this folder to a GitHub repository (GitHub Desktop is the easiest
+   route if you don't use git from the command line).
+2. Create a free Netlify account, "Add new site → Import an existing
+   project," and point it at that repo.
+3. Build settings: a `netlify.toml` file is already included in this project
+   and sets the build command (`npm run build`) and publish directory
+   (`dist`) automatically — Netlify's onboarding may auto-detect these too
+   and skip asking; either way `netlify.toml` wins, so nothing to type here.
+4. Add the environment variable `INVENTORY_CSV_URL` (Site settings →
+   Environment variables) with your published Sheet's CSV link — this is what
+   makes `npm run build` pull live inventory during every deploy.
+5. Add a **Build hook** (Site settings → Build & deploy → Build hooks) and
+   bookmark its URL — visiting it triggers a rebuild without a code push, so
+   editing the Sheet and hitting that bookmark is your whole inventory-update
+   workflow once live.
+6. (Optional) Connect a custom domain under Domain settings.
+
 - Checkout and the contact form are wired but mock: no payment or email
   provider is attached, and nothing sensitive is collected.
 - Waitlist signups (out-of-stock designs) currently persist to the visitor's
