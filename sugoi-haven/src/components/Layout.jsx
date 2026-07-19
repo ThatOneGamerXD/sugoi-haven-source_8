@@ -18,6 +18,12 @@ export default function Layout() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-aizuri focus:px-4 focus:py-2 focus:text-washi"
+      >
+        Skip to content
+      </a>
       <header className="sticky top-0 z-40 border-b rule bg-washi/95 backdrop-blur-sm">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
           <Link to="/" className="flex items-center gap-3">
@@ -77,7 +83,7 @@ export default function Layout() {
         )}
       </header>
 
-      <main className="flex-1"><Outlet /></main>
+      <main id="main" className="flex-1"><Outlet /></main>
 
       <footer className="mt-20 border-t rule bg-washi-deep/60">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 text-sm text-sumi-soft sm:grid-cols-3">

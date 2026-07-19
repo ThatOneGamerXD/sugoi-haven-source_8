@@ -155,9 +155,12 @@ a Snipcart button/link, this hook already covers it — no per-page fix needed.
 
 ## What is mock / not yet built
 
-- Contact form and waitlist signups persist only to the visitor's own
-  localStorage (`sugoi-haven-waitlist-v1`) — must be pointed at a real
-  provider before they're trusted.
+- Contact form ("contact") and per-design waitlist ("waitlist") are REAL
+  Netlify Forms — plain <form data-netlify> markup that survives into the
+  prerendered HTML (that's how Netlify detects them; don't convert them to
+  JS-only rendering or detection breaks). Submissions: Netlify dashboard →
+  Forms tab. Owner must enable form detection + email notifications there
+  once (see README). Honeypot field "bot-field" for spam.
 - Remaining roadmap: Search Console/Bing submission (done as of this
   writing), owner's photography pass (ongoing), phase-2 "compare copies"
   toggle on print pages.

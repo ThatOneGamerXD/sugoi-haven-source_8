@@ -275,22 +275,33 @@ function Lightbox({ onClose, children }) {
   );
 }
 
-/** Per-design waitlist capture. Emails persist in localStorage for now;
- *  point `submitWaitlist` at your email provider / backend at launch. */
-const WAITLIST_KEY = 'sugoi-haven-waitlist-v1';
-function submitWaitlist(designId, email) {
-  try {
-    const all = JSON.parse(localStorage.getItem(WAITLIST_KEY)) ?? [];
-    all.push({ designId, email, at: new Date().toISOString() });
-    localStorage.setItem(WAITLIST_KEY, JSON.stringify(all));
-  } catch { /* private mode */ }
-}
-
+/** Per-design waitlist capture — a real Netlify Form ("waitlist"): submissions
+ *  land in the Netlify dashboard (Forms tab) and can email the owner. */
 function Waitlist({ design }) {
   const [email, setEmail] = useState('');
-  const [done, setDone] = useState(false);
+  const [status, setStatus] = useState('idle'); // idle | sending | done | error
   const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  if (done) {
+
+  async function submit() {
+    setStatus('sending');
+    try {
+      const res = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          'form-name': 'waitlist',
+          email,
+          design: design.titleEn,
+          design_id: design.id,
+        }).toString(),
+      });
+      setStatus(res.ok ? 'done' : 'error');
+    } catch {
+      setStatus('error');
+    }
+  }
+
+  if (status === 'done') {
     return (
       <Card className="p-4 text-sm text-sumi-soft">
         Noted — you're on the list for <span className="font-medium text-sumi">{design.titleEn}</span>.
@@ -304,24 +315,34 @@ function Waitlist({ design }) {
         No copies of this design are photographed and listed yet.
         Leave your email and we'll tell you the moment one arrives — nothing else, no newsletter.
       </p>
-      <div className="mt-3 flex gap-2">
+      <form
+        name="waitlist"
+        method="POST"
+        data-netlify="true"
+        netlify-honeypot="bot-field"
+        onSubmit={e => { e.preventDefault(); if (valid) submit(); }}
+        className="mt-3 flex gap-2"
+      >
+        <input type="hidden" name="form-name" value="waitlist" />
+        <input type="hidden" name="design" value={design.titleEn} />
+        <input type="hidden" name="design_id" value={design.id} />
+        <p className="hidden"><label>Don't fill this out: <input name="bot-field" /></label></p>
         <input
           type="email"
+          name="email"
           className={inputCls}
           placeholder="you@example.com"
           value={email}
           onChange={e => setEmail(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter' && valid) { submitWaitlist(design.id, email); setDone(true); } }}
           aria-label={`Waitlist email for ${design.titleEn}`}
         />
-        <Button
-          variant="indigo"
-          disabled={!valid}
-          onClick={() => { submitWaitlist(design.id, email); setDone(true); }}
-        >
-          Notify me
+        <Button variant="indigo" type="submit" disabled={!valid || status === 'sending'}>
+          {status === 'sending' ? 'Adding…' : 'Notify me'}
         </Button>
-      </div>
+      </form>
+      {status === 'error' && (
+        <p className="mt-2 text-xs text-ume-deep">That didn't go through — please try again in a moment.</p>
+      )}
     </Card>
   );
 }

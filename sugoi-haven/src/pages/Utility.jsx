@@ -98,22 +98,60 @@ export const FAQ = () => (
 );
 
 export function Contact() {
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState('idle'); // idle | sending | sent | error
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+
+  async function submit(e) {
+    e.preventDefault();
+    setStatus('sending');
+    try {
+      const res = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ 'form-name': 'contact', email, message }).toString(),
+      });
+      setStatus(res.ok ? 'sent' : 'error');
+    } catch {
+      setStatus('error');
+    }
+  }
+
   return (
     <Page title="Contact">
-      {sent ? (
+      {status === 'sent' ? (
         <Card className="p-8 text-center text-sm text-sumi-soft" data-reveal>
-          Message noted — this development build doesn't send email yet, but the form and flow are
-          wired for your provider of choice.
+          Message sent — we read everything and reply by email, usually within a day or two.
         </Card>
       ) : (
-        <div className="grid gap-4" data-reveal>
-          <Field label="Your email"><input className={inputCls} type="email" placeholder="you@example.com" /></Field>
-          <Field label="Message">
-            <textarea className={`${inputCls} min-h-32`} placeholder="Ask about a design, a set, or a specific listing…" />
+        <form
+          name="contact"
+          method="POST"
+          data-netlify="true"
+          netlify-honeypot="bot-field"
+          onSubmit={submit}
+          className="grid gap-4"
+          data-reveal
+        >
+          <input type="hidden" name="form-name" value="contact" />
+          <p className="hidden"><label>Don't fill this out: <input name="bot-field" /></label></p>
+          <Field label="Your email">
+            <input className={inputCls} type="email" name="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" />
           </Field>
-          <div><Button variant="primary" onClick={() => setSent(true)}>Send message</Button></div>
-        </div>
+          <Field label="Message">
+            <textarea className={`${inputCls} min-h-32`} name="message" required value={message} onChange={e => setMessage(e.target.value)} placeholder="Ask about a design, a set, or a specific listing…" />
+          </Field>
+          {status === 'error' && (
+            <p className="text-sm text-ume-deep">
+              That didn't go through — please try again in a moment.
+            </p>
+          )}
+          <div>
+            <Button variant="primary" type="submit" disabled={status === 'sending'}>
+              {status === 'sending' ? 'Sending…' : 'Send message'}
+            </Button>
+          </div>
+        </form>
       )}
       <P>Asking about a specific print? Include the artwork name and publisher from its listing card.</P>
     </Page>
